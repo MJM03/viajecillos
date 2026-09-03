@@ -7,7 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Viajecillos — Control de viáticos</title>
-  <link rel="stylesheet" href="styles.css?v=mobile-v10" />
+  <link rel="stylesheet" href="styles.css?v=mobile-v11" />
+  <link rel="stylesheet" href="extras-ui.css?v=mobile-v11" />
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
@@ -25,12 +26,12 @@
       <label class="expense-field"><div class="expense-label"><span>🍽️</span><div><b>Alimentación</b><small id="foodHint"></small></div></div><div class="money-input"><span>S/</span><input id="foodInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
       <label class="expense-field"><div class="expense-label"><span>🚕</span><div><b>Movilidad</b><small id="mobilityHint"></small></div></div><div class="money-input"><span>S/</span><input id="mobilityInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
     </div>
-    <section class="extra-expenses"><div class="extra-title"><div><b>＋ Gastos extra</b><small>Registra cualquier gasto fuera de las categorías principales.</small></div></div><div class="extra-entry"><input id="extraDescription" type="text" maxlength="80" placeholder="¿En qué se gastó?" aria-label="Descripción del gasto extra"><div class="money-input extra-money"><span>S/</span><input id="extraAmount" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" aria-label="Monto del gasto extra"></div><button id="addExtraBtn" class="extra-add-btn" type="button">Agregar</button></div><div id="extraExpensesList" class="extra-list"></div><p id="extraMessage" class="extra-message" role="status"></p></section>
+    <section class="extra-expenses"><div class="extra-title"><div><b>Gastos extra</b><small>Registra cualquier gasto fuera de las categorías principales.</small></div></div><div class="extra-entry"><input id="extraDescription" type="text" maxlength="80" placeholder="¿En qué se gastó?" aria-label="Descripción del gasto extra"><div class="money-input extra-money"><span>S/</span><input id="extraAmount" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" aria-label="Monto del gasto extra"></div><button id="addExtraBtn" class="extra-add-btn" type="button">Agregar</button></div><div id="extraExpensesList" class="extra-list"></div><p id="extraMessage" class="extra-message" role="status"></p></section>
     <div class="day-summary" id="daySummary"></div><div class="day-actions"><button id="saveProgressBtn" class="secondary-btn" type="button">Guardar avance</button><button id="closeDayBtn" class="primary-btn" type="submit">Cerrar día</button><button id="reopenDayBtn" class="secondary-btn danger-soft" type="button" hidden>Reabrir día</button></div><p class="action-help">“Guardar avance” conserva lo gastado hasta ahora y puedes seguir agregando después.</p><p id="saveMessage" class="save-message" role="status" aria-live="polite"></p></form></section></section>
     <section id="detalle" class="app-screen" data-screen="detalle"><section class="table-panel"><div class="section-heading"><div><p class="eyebrow">Detalle</p><h2>Seguimiento por día</h2></div></div><div class="trip-list mobile-only" id="tripCards"></div><div class="table-wrap desktop-table"><table><thead><tr><th>Fecha</th><th>Destino</th><th>Estimado</th><th>Real</th><th>Ahorro</th><th>Estado</th></tr></thead><tbody id="tripTableBody"></tbody></table></div></section></section>
   </main>
   <nav class="mobile-nav" aria-label="Navegación principal"><button class="nav-item active" type="button" data-go="resumen"><span>⌂</span><small>Resumen</small></button><button class="nav-item nav-primary" type="button" data-go="registrar"><span>＋</span><small>Registrar</small></button><button class="nav-item" type="button" data-go="detalle"><span>▤</span><small>Detalle</small></button></nav>
-  <script src="app.js?v=mobile-v10"></script>
-  <script src="extras.js?v=mobile-v10"></script>
+  <script src="app.js?v=mobile-v11"></script>
+  <script src="extras.js?v=mobile-v11"></script>
 </body>
 </html>
