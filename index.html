@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Viajecillos — Control de viáticos</title>
-  <link rel="stylesheet" href="styles.css?v=mobile-v7" />
+  <link rel="stylesheet" href="styles.css?v=mobile-v9" />
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
@@ -20,14 +20,14 @@
       <button class="quick-register mobile-only" type="button" data-go="registrar"><span>＋</span><div><strong>Registrar gastos de hoy</strong><small>Guarda avances sin cerrar el día</small></div><b>›</b></button>
     </section>
     <section id="registrar" class="app-screen" data-screen="registrar"><section class="entry-panel"><div class="section-heading"><div><p class="eyebrow">Registro diario</p><h2>Gastos reales</h2></div><select id="daySelect" aria-label="Seleccionar día"></select></div><div id="dayMeta" class="day-meta"></div><form id="expenseForm" class="expense-form"><div class="expense-grid">
-      <label class="expense-field"><div class="expense-label"><span>🚍</span><div><b>Transporte</b><small id="transportHint"></small></div></div><div class="money-input"><span>S/</span><input id="transportInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Objetivo" /></div></label>
-      <label class="expense-field"><div class="expense-label"><span>🏨</span><div><b>Hospedaje</b><small id="hotelHint"></small></div></div><div class="money-input"><span>S/</span><input id="hotelInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Objetivo" /></div></label>
-      <label class="expense-field"><div class="expense-label"><span>🍽️</span><div><b>Alimentación</b><small id="foodHint"></small></div></div><div class="money-input"><span>S/</span><input id="foodInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Objetivo" /></div></label>
-      <label class="expense-field"><div class="expense-label"><span>🚕</span><div><b>Movilidad</b><small id="mobilityHint"></small></div></div><div class="money-input"><span>S/</span><input id="mobilityInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Objetivo" /></div></label>
+      <label class="expense-field"><div class="expense-label"><span>🚍</span><div><b>Transporte</b><small id="transportHint"></small></div></div><div class="money-input"><span>S/</span><input id="transportInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+      <label class="expense-field"><div class="expense-label"><span>🏨</span><div><b>Hospedaje</b><small id="hotelHint"></small></div></div><div class="money-input"><span>S/</span><input id="hotelInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+      <label class="expense-field"><div class="expense-label"><span>🍽️</span><div><b>Alimentación</b><small id="foodHint"></small></div></div><div class="money-input"><span>S/</span><input id="foodInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+      <label class="expense-field"><div class="expense-label"><span>🚕</span><div><b>Movilidad</b><small id="mobilityHint"></small></div></div><div class="money-input"><span>S/</span><input id="mobilityInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
     </div><div class="day-summary" id="daySummary"></div><div class="day-actions"><button id="saveProgressBtn" class="secondary-btn" type="button">Guardar avance</button><button id="closeDayBtn" class="primary-btn" type="submit">Cerrar día</button><button id="reopenDayBtn" class="secondary-btn danger-soft" type="button" hidden>Reabrir día</button></div><p class="action-help">“Guardar avance” conserva lo gastado hasta ahora y puedes seguir agregando después.</p><p id="saveMessage" class="save-message" role="status" aria-live="polite"></p></form></section></section>
-    <section id="detalle" class="app-screen" data-screen="detalle"><section class="table-panel"><div class="section-heading"><div><p class="eyebrow">Detalle</p><h2>Seguimiento por día</h2></div></div><div class="trip-list mobile-only" id="tripCards"></div><div class="table-wrap desktop-table"><table><thead><tr><th>Fecha</th><th>Destino</th><th>Objetivo</th><th>Real</th><th>Ahorro</th><th>Estado</th></tr></thead><tbody id="tripTableBody"></tbody></table></div></section></section>
+    <section id="detalle" class="app-screen" data-screen="detalle"><section class="table-panel"><div class="section-heading"><div><p class="eyebrow">Detalle</p><h2>Seguimiento por día</h2></div></div><div class="trip-list mobile-only" id="tripCards"></div><div class="table-wrap desktop-table"><table><thead><tr><th>Fecha</th><th>Destino</th><th>Proyectado</th><th>Real</th><th>Ahorro</th><th>Estado</th></tr></thead><tbody id="tripTableBody"></tbody></table></div></section></section>
   </main>
   <nav class="mobile-nav" aria-label="Navegación principal"><button class="nav-item active" type="button" data-go="resumen"><span>⌂</span><small>Resumen</small></button><button class="nav-item nav-primary" type="button" data-go="registrar"><span>＋</span><small>Registrar</small></button><button class="nav-item" type="button" data-go="detalle"><span>▤</span><small>Detalle</small></button></nav>
-  <script src="app.js?v=mobile-v7"></script>
+  <script src="app.js?v=mobile-v9"></script>
 </body>
 </html>
