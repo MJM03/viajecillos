@@ -1,0 +1,9 @@
+{
+  "name":"Viajecillos — Control de viáticos",
+  "short_name":"Viajecillos",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#f4f7fb",
+  "theme_color":"#0f172a",
+  "description":"Control diario de gastos, ahorro grupal y proyección de viáticos para 6 personas."
+}
