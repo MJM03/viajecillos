@@ -1,4 +1,5 @@
 const EXTRA_STORAGE_KEY='viajecillos-v1-extra-expenses';
+const BASELINE_PROJECTED_SPEND=5408.73;
 let extraSaved=loadExtraExpenses();
 function loadExtraExpenses(){try{return JSON.parse(localStorage.getItem(EXTRA_STORAGE_KEY))||{}}catch{return {}}}
 function persistExtraExpenses(){localStorage.setItem(EXTRA_STORAGE_KEY,JSON.stringify(extraSaved))}
@@ -6,13 +7,21 @@ function extrasFor(day){return Array.isArray(extraSaved[day.date])?extraSaved[da
 function extraTotal(day){return extrasFor(day).reduce((s,x)=>s+(Number(x.amount)||0),0)}
 function actualTotalWithExtras(day){return sumObj(actualFor(day))+extraTotal(day)}
 function hasAnyProgress(day){return hasProgress(day)||extrasFor(day).length>0}
+function projectedTotalWithExtras(){
+  return trip.reduce((total,d)=>{
+    const target=sumObj(d.target);
+    if(isClosed(d)) return total+(actualTotalWithExtras(d)-target);
+    if(hasAnyProgress(d)) return total+(Math.max(target,actualTotalWithExtras(d))-target);
+    return total;
+  },BASELINE_PROJECTED_SPEND);
+}
 
 const originalRenderDashboard=renderDashboard;
 renderDashboard=function(){
   const totalGross=sumTrip('gross'),totalNet=sumTrip('net'),closed=trip.filter(isClosed),withProgress=trip.filter(hasAnyProgress);
   const actualSpent=withProgress.reduce((s,d)=>s+actualTotalWithExtras(d),0);
   const registeredSavings=withProgress.reduce((s,d)=>s+sumObj(d.net)-actualTotalWithExtras(d),0);
-  const projectedSpent=trip.reduce((s,d)=>{const real=actualTotalWithExtras(d),target=sumObj(d.target);if(isClosed(d))return real;if(hasAnyProgress(d))return Math.max(target,real);return target},0);
+  const projectedSpent=projectedTotalWithExtras();
   const projectedSavings=totalNet-projectedSpent,done=closed.length,inProgress=trip.filter(d=>hasAnyProgress(d)&&!isClosed(d)).length,usage=totalNet?projectedSpent/totalNet*100:0;
   $('realSavings').textContent=money(registeredSavings);$('realSavingsPerson').textContent=`${money(registeredSavings/PEOPLE)} por persona`;
   $('projectedSavings').textContent=money(projectedSavings);$('projectedSavingsPerson').textContent=`${money(projectedSavings/PEOPLE)} por persona`;
