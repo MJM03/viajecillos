@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Viajecillos — Control de viáticos</title>
-  <link rel="stylesheet" href="styles.css?v=mobile-v3" />
+  <link rel="stylesheet" href="styles.css?v=mobile-v4" />
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
@@ -24,19 +24,20 @@
     <section id="resumen" class="app-screen active" data-screen="resumen">
       <div class="screen-title mobile-only"><div><p class="eyebrow">Hoy</p><h2>Resumen del viaje</h2></div></div>
       <div class="kpi-grid" aria-label="Resumen">
-        <article class="kpi-card accent"><span>Ahorro real</span><strong id="realSavings">S/ 0.00</strong><small id="realSavingsPerson">S/ 0.00 por persona</small></article>
+        <article class="kpi-card accent"><span>Ahorro registrado</span><strong id="realSavings">S/ 0.00</strong><small id="realSavingsPerson">S/ 0.00 por persona</small></article>
         <article class="kpi-card"><span>Ahorro proyectado</span><strong id="projectedSavings">S/ 0.00</strong><small id="projectedSavingsPerson">S/ 0.00 por persona</small></article>
-        <article class="kpi-card"><span>Gastado</span><strong id="actualSpent">S/ 0.00</strong><small id="daysDone">0 de 15 días</small></article>
+        <article class="kpi-card"><span>Gastado hasta ahora</span><strong id="actualSpent">S/ 0.00</strong><small id="daysDone">0 días cerrados</small></article>
         <article class="kpi-card"><span>Proyección final</span><strong id="projectedSpent">S/ 0.00</strong><small id="budgetUsage">0% del disponible</small></article>
       </div>
 
       <section class="progress-panel">
-        <div class="section-heading compact-heading"><div><p class="eyebrow">Presupuesto</p><h2>Uso del disponible</h2></div><span id="netBudgetLabel" class="pill"></span></div>
+        <div class="section-heading compact-heading"><div><p class="eyebrow">Presupuesto real</p><h2 id="grossBudgetLabel">S/ 16,614.00</h2></div><span id="netBudgetLabel" class="pill"></span></div>
+        <div class="budget-note">Disponible después del IGV usado en la hoja: <strong id="netBudgetText"></strong></div>
         <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
         <div class="legend-row"><span><i class="dot budget"></i>Disponible</span><span><i class="dot actual"></i>Real + proyectado</span></div>
       </section>
 
-      <button class="quick-register mobile-only" type="button" data-go="registrar"><span>＋</span><div><strong>Registrar gastos de hoy</strong><small>Transporte, hospedaje, comida y movilidad</small></div><b>›</b></button>
+      <button class="quick-register mobile-only" type="button" data-go="registrar"><span>＋</span><div><strong>Registrar gastos de hoy</strong><small>Guarda avances sin cerrar el día</small></div><b>›</b></button>
     </section>
 
     <section id="registrar" class="app-screen" data-screen="registrar">
@@ -51,7 +52,12 @@
             <label class="expense-field"><div class="expense-label"><span>🚕</span><div><b>Movilidad</b><small id="mobilityHint"></small></div></div><div class="money-input"><span>S/</span><input id="mobilityInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
           </div>
           <div class="day-summary" id="daySummary"></div>
-          <button class="primary-btn" type="submit">Guardar y cerrar día</button>
+          <div class="day-actions">
+            <button id="saveProgressBtn" class="secondary-btn" type="button">Guardar avance</button>
+            <button id="closeDayBtn" class="primary-btn" type="submit">Cerrar día</button>
+            <button id="reopenDayBtn" class="secondary-btn danger-soft" type="button" hidden>Reabrir día</button>
+          </div>
+          <p class="action-help">“Guardar avance” conserva lo gastado hasta ahora y puedes seguir agregando después.</p>
           <p id="saveMessage" class="save-message" role="status" aria-live="polite"></p>
         </form>
       </section>
@@ -72,6 +78,6 @@
     <button class="nav-item" type="button" data-go="detalle"><span>▤</span><small>Detalle</small></button>
   </nav>
 
-  <script src="app.js?v=mobile-v3"></script>
+  <script src="app.js?v=mobile-v4"></script>
 </body>
 </html>
