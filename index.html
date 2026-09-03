@@ -19,7 +19,7 @@
   </header>
 
   <main class="app-shell">
-    <section class="kpi-grid" aria-label="Resumen">
+    <section id="resumen" class="kpi-grid" aria-label="Resumen">
       <article class="kpi-card accent">
         <span>Ahorro real del grupo</span>
         <strong id="realSavings">S/ 0.00</strong>
@@ -57,7 +57,7 @@
       </div>
     </section>
 
-    <section class="entry-panel">
+    <section id="registrar" class="entry-panel">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Registro diario</p>
@@ -82,11 +82,17 @@
       </form>
     </section>
 
-    <section class="table-panel">
+    <section id="detalle" class="table-panel">
       <div class="section-heading"><div><p class="eyebrow">Detalle del viaje</p><h2>Seguimiento por día</h2></div></div>
       <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Destino</th><th>Objetivo gasto</th><th>Real</th><th>Ahorro</th><th>Estado</th></tr></thead><tbody id="tripTableBody"></tbody></table></div>
     </section>
   </main>
+
+  <nav class="mobile-nav" aria-label="Navegación principal">
+    <a href="#resumen"><span aria-hidden="true">📊</span><small>Resumen</small></a>
+    <a class="mobile-nav-primary" href="#registrar"><span aria-hidden="true">＋</span><small>Registrar</small></a>
+    <a href="#detalle"><span aria-hidden="true">🧾</span><small>Detalle</small></a>
+  </nav>
 
   <script src="app.js"></script>
 </body>
