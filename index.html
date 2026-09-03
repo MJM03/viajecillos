@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Viajecillos — Control de viáticos</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.webmanifest" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Viaje Norte · Líder 2</p>
+      <h1>Control de viáticos</h1>
+      <p class="muted">6 personas · 6 al 20 de septiembre de 2026</p>
+    </div>
+    <button id="resetBtn" class="ghost-btn" type="button">Reiniciar datos</button>
+  </header>
+
+  <main class="app-shell">
+    <section class="kpi-grid" aria-label="Resumen">
+      <article class="kpi-card accent">
+        <span>Ahorro real del grupo</span>
+        <strong id="realSavings">S/ 0.00</strong>
+        <small id="realSavingsPerson">S/ 0.00 por persona</small>
+      </article>
+      <article class="kpi-card">
+        <span>Ahorro final proyectado</span>
+        <strong id="projectedSavings">S/ 0.00</strong>
+        <small id="projectedSavingsPerson">S/ 0.00 por persona</small>
+      </article>
+      <article class="kpi-card">
+        <span>Gasto real registrado</span>
+        <strong id="actualSpent">S/ 0.00</strong>
+        <small id="daysDone">0 de 15 días cerrados</small>
+      </article>
+      <article class="kpi-card">
+        <span>Gasto final proyectado</span>
+        <strong id="projectedSpent">S/ 0.00</strong>
+        <small id="budgetUsage">0% del disponible neto</small>
+      </article>
+    </section>
+
+    <section class="progress-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Progreso</p>
+          <h2>Presupuesto vs. gasto</h2>
+        </div>
+        <span id="netBudgetLabel" class="pill"></span>
+      </div>
+      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+      <div class="legend-row">
+        <span><i class="dot budget"></i> Disponible neto (sin IGV)</span>
+        <span><i class="dot actual"></i> Gasto real + proyectado</span>
+      </div>
+    </section>
+
+    <section class="entry-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Registro diario</p>
+          <h2>Ingresa los gastos reales</h2>
+        </div>
+        <select id="daySelect" aria-label="Seleccionar día"></select>
+      </div>
+
+      <div id="dayMeta" class="day-meta"></div>
+
+      <form id="expenseForm" class="expense-form">
+        <div class="expense-grid">
+          <label class="expense-field"><span>🚍 Transporte</span><small id="transportHint"></small><div class="money-input"><span>S/</span><input id="transportInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+          <label class="expense-field"><span>🏨 Hospedaje</span><small id="hotelHint"></small><div class="money-input"><span>S/</span><input id="hotelInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+          <label class="expense-field"><span>🍽️ Alimentación</span><small id="foodHint"></small><div class="money-input"><span>S/</span><input id="foodInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+          <label class="expense-field"><span>🚕 Movilidad</span><small id="mobilityHint"></small><div class="money-input"><span>S/</span><input id="mobilityInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00" /></div></label>
+        </div>
+
+        <div class="day-summary" id="daySummary"></div>
+        <button class="primary-btn" type="submit">Guardar y cerrar día</button>
+        <p id="saveMessage" class="save-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="table-panel">
+      <div class="section-heading"><div><p class="eyebrow">Detalle del viaje</p><h2>Seguimiento por día</h2></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Destino</th><th>Objetivo gasto</th><th>Real</th><th>Ahorro</th><th>Estado</th></tr></thead><tbody id="tripTableBody"></tbody></table></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
