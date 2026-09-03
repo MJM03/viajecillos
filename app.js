@@ -30,7 +30,7 @@ let currentIndex = firstPendingIndex();
 
 const $ = id => document.getElementById(id);
 const els = {
-  daySelect:$('daySelect'),dayMeta:$('dayMeta'),form:$('expenseForm'),saveMessage:$('saveMessage'),table:$('tripTableBody'),
+  daySelect:$('daySelect'),dayMeta:$('dayMeta'),form:$('expenseForm'),saveMessage:$('saveMessage'),table:$('tripTableBody'),cards:$('tripCards'),
   inputs:{transport:$('transportInput'),hotel:$('hotelInput'),food:$('foodInput'),mobility:$('mobilityInput')},
   hints:{transport:$('transportHint'),hotel:$('hotelHint'),food:$('foodHint'),mobility:$('mobilityHint')}
 };
@@ -50,7 +50,15 @@ function init(){
   els.form.addEventListener('submit',saveDay);
   $('resetBtn').addEventListener('click',resetData);
   keys.forEach(k=>els.inputs[k].addEventListener('input',renderDaySummary));
+  document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>showScreen(btn.dataset.go)));
   renderAll();
+}
+
+function showScreen(name){
+  if(window.innerWidth>600) return;
+  document.querySelectorAll('.app-screen').forEach(s=>s.classList.toggle('active',s.dataset.screen===name));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.go===name));
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function renderAll(){renderDashboard();renderDay();renderTable();refreshSelectLabels()}
@@ -70,21 +78,21 @@ function renderDashboard(){
   $('projectedSavings').textContent=money(projectedSavings);
   $('projectedSavingsPerson').textContent=`${money(projectedSavings/PEOPLE)} por persona`;
   $('actualSpent').textContent=money(actualSpent);
-  $('daysDone').textContent=`${done} de ${trip.length} días cerrados`;
+  $('daysDone').textContent=`${done} de ${trip.length} días`;
   $('projectedSpent').textContent=money(projectedSpent);
-  $('budgetUsage').textContent=`${usage.toFixed(1)}% del disponible neto`;
-  $('netBudgetLabel').textContent=`Disponible neto: ${money(totalNet)}`;
+  $('budgetUsage').textContent=`${usage.toFixed(1)}% del disponible`;
+  $('netBudgetLabel').textContent=money(totalNet);
   $('progressBar').style.width=`${Math.max(0,Math.min(100,usage))}%`;
 }
 
 function renderDay(){
   const d=trip[currentIndex]; const actual=actualFor(d); const closed=isClosed(d);
-  els.dayMeta.innerHTML=`<strong>${formatDate(d.date)} · ${d.place}</strong><br>Presupuesto bruto: ${money(sumObj(d.gross))} · Disponible neto sin IGV: ${money(sumObj(d.net))} · Gasto objetivo: ${money(sumObj(d.target))}`;
+  els.dayMeta.innerHTML=`<strong>${formatDate(d.date)} · ${d.place}</strong><br>Bruto ${money(sumObj(d.gross))} · Neto ${money(sumObj(d.net))} · Objetivo ${money(sumObj(d.target))}`;
   keys.forEach(k=>{
     els.inputs[k].value=closed?String(actual[k]??0):'';
-    els.hints[k].textContent=`Objetivo ${money(d.target[k])} · Disponible ${money(d.net[k])}`;
+    els.hints[k].textContent=`Objetivo ${money(d.target[k])} · Disp. ${money(d.net[k])}`;
   });
-  els.saveMessage.textContent=closed?'Día guardado. Puedes editarlo y volver a guardar.':'';
+  els.saveMessage.textContent=closed?'Día guardado. Puedes editarlo.':'';
   renderDaySummary();
 }
 
@@ -92,10 +100,10 @@ function readInputs(){const out={};for(const k of keys){const v=parseFloat(els.i
 function renderDaySummary(){
   const d=trip[currentIndex],actual=readInputs(); const target=sumObj(d.target), net=sumObj(d.net), act=sumObj(actual), savings=net-act;
   $('daySummary').innerHTML=`
-    <div class="mini-stat"><span>Gasto objetivo</span><strong>${money(target)}</strong></div>
-    <div class="mini-stat"><span>Gasto ingresado</span><strong>${money(act)}</strong></div>
+    <div class="mini-stat"><span>Objetivo</span><strong>${money(target)}</strong></div>
+    <div class="mini-stat"><span>Ingresado</span><strong>${money(act)}</strong></div>
     <div class="mini-stat ${act<=target?'positive':'negative'}"><span>Vs. objetivo</span><strong>${act<=target?'+':''}${money(target-act)}</strong></div>
-    <div class="mini-stat ${savings>=0?'positive':'negative'}"><span>Ahorro del grupo</span><strong>${money(savings)}</strong><small> · ${money(savings/PEOPLE)} c/u</small></div>`;
+    <div class="mini-stat ${savings>=0?'positive':'negative'}"><span>Ahorro grupo</span><strong>${money(savings)}</strong><small> · ${money(savings/PEOPLE)} c/u</small></div>`;
 }
 
 function saveDay(e){
@@ -111,6 +119,12 @@ function renderTable(){
     let status='<span class="status pending">Pendiente</span>';
     if(closed) status=actual<=target?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre objetivo</span>';
     return `<tr><td>${formatDate(d.date)}</td><td>${d.place}</td><td>${money(target)}</td><td>${closed?money(actual):'—'}</td><td class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</td><td>${status}</td></tr>`
+  }).join('');
+
+  if(els.cards) els.cards.innerHTML=trip.map(d=>{
+    const closed=isClosed(d), actual=closed?sumObj(actualFor(d)):null, target=sumObj(d.target), savings=closed?actualSavings(d):plannedSavings(d);
+    const status=closed?(actual<=target?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre objetivo</span>'):'<span class="status pending">Pendiente</span>';
+    return `<article class="trip-card"><div class="trip-card-head"><div><strong>${formatDate(d.date)} · ${d.place}</strong><small>${closed?'Gasto real registrado':'Aún sin cerrar'}</small></div>${status}</div><div class="trip-card-stats"><div class="trip-card-stat"><span>Objetivo</span><b>${money(target)}</b></div><div class="trip-card-stat"><span>Real</span><b>${closed?money(actual):'—'}</b></div><div class="trip-card-stat"><span>${closed?'Ahorro':'Ahorro estimado'}</span><b class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</b></div></div></article>`;
   }).join('');
 }
 
