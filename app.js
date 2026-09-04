@@ -1,5 +1,5 @@
 const PEOPLE = 6;
-const STORAGE_KEY = 'viajecillos-v1-expenses';
+const STORAGE_KEY = 'viajecillos-v2-expenses';
 
 const trip = [
   {date:'2026-09-06',place:'Huaraz — K67',gross:{transport:720,hotel:840,food:600,mobility:108},net:{transport:590.40,hotel:688.80,food:492,mobility:88.56},target:{transport:382.50,hotel:150,food:150,mobility:44.28}},
