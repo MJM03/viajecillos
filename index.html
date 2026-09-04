@@ -7,17 +7,17 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Viajecillos — Control de viáticos</title>
-  <link rel="stylesheet" href="styles.css?v=mobile-v15" />
-  <link rel="stylesheet" href="extras-ui.css?v=mobile-v15" />
+  <link rel="stylesheet" href="styles.css?v=mobile-v16" />
+  <link rel="stylesheet" href="extras-ui.css?v=mobile-v16" />
   <link rel="manifest" href="manifest.webmanifest" />
 </head>
 <body>
-  <header class="topbar"><div><p class="eyebrow">Viaje Norte · Líder 2</p><h1>Viajecillos</h1><p class="muted">6 personas · 06–18 sep. 2026</p></div><button id="resetBtn" class="ghost-btn" type="button" aria-label="Reiniciar datos">Reiniciar</button></header>
+  <header class="topbar"><div><p class="eyebrow">Viaje Norte · Líder 2</p><h1>Viajecillos</h1><p class="muted">6 personas · 06–18 sep. 2026</p></div><button id="resetBtn" class="ghost-btn" type="button" aria-label="Descargar Excel de viáticos">Descargar Excel</button></header>
   <main class="app-shell">
     <section id="resumen" class="app-screen active" data-screen="resumen">
       <div class="screen-title mobile-only"><div><p class="eyebrow">Hoy</p><h2>Resumen del viaje</h2></div></div>
       <div class="kpi-grid" aria-label="Resumen"><article class="kpi-card accent"><span>Ahorro registrado</span><strong id="realSavings">S/ 0.00</strong><small id="realSavingsPerson">S/ 0.00 por persona</small></article><article class="kpi-card"><span>Ahorro estimado final</span><strong id="projectedSavings">S/ 0.00</strong><small id="projectedSavingsPerson">S/ 0.00 por persona</small></article><article class="kpi-card"><span>Gastado hasta ahora</span><strong id="actualSpent">S/ 0.00</strong><small id="daysDone">0 días cerrados</small></article><article class="kpi-card"><span>Gasto estimado final</span><strong id="projectedSpent">S/ 0.00</strong><small id="budgetUsage">0% del disponible</small></article></div>
-      <section class="progress-panel"><div class="section-heading compact-heading"><div><p class="eyebrow">Presupuesto real</p><h2 id="grossBudgetLabel">S/ 14,778.00</h2></div><span id="netBudgetLabel" class="pill"></span></div><div class="budget-note">Disponible después del IGV usado en la hoja: <strong id="netBudgetText"></strong></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><div class="legend-row"><span><i class="dot budget"></i>Disponible</span><span><i class="dot actual"></i>Real + estimado</span></div></section>
+      <section class="progress-panel"><div class="section-heading compact-heading"><div><p class="eyebrow">Presupuesto real</p><h2 id="grossBudgetLabel">S/ 15,258.00</h2></div><span id="netBudgetLabel" class="pill"></span></div><div class="budget-note">Disponible después del IGV usado en la hoja: <strong id="netBudgetText"></strong></div><div class="progress-track"><div id="progressBar" class="progress-bar"></div></div><div class="legend-row"><span><i class="dot budget"></i>Disponible</span><span><i class="dot actual"></i>Real + estimado</span></div></section>
       <button class="quick-register mobile-only" type="button" data-go="registrar"><span>＋</span><div><strong>Registrar gastos de hoy</strong><small>Guarda avances sin cerrar el día</small></div><b>›</b></button>
     </section>
     <section id="registrar" class="app-screen" data-screen="registrar"><section class="entry-panel"><div class="section-heading"><div><p class="eyebrow">Registro diario</p><h2>Gastos reales</h2></div><select id="daySelect" aria-label="Seleccionar día"></select></div><div id="dayMeta" class="day-meta"></div><form id="expenseForm" class="expense-form"><div class="expense-grid">
@@ -31,7 +31,9 @@
     <section id="detalle" class="app-screen" data-screen="detalle"><section class="table-panel"><div class="section-heading"><div><p class="eyebrow">Detalle</p><h2>Seguimiento por día</h2></div></div><div class="trip-list mobile-only" id="tripCards"></div><div class="table-wrap desktop-table"><table><thead><tr><th>Fecha</th><th>Destino</th><th>Estimado</th><th>Real</th><th>Ahorro</th><th>Estado</th></tr></thead><tbody id="tripTableBody"></tbody></table></div></section></section>
   </main>
   <nav class="mobile-nav" aria-label="Navegación principal"><button class="nav-item active" type="button" data-go="resumen"><span>⌂</span><small>Resumen</small></button><button class="nav-item nav-primary" type="button" data-go="registrar"><span>＋</span><small>Registrar</small></button><button class="nav-item" type="button" data-go="detalle"><span>▤</span><small>Detalle</small></button></nav>
-  <script src="app.js?v=mobile-v15"></script>
-  <script src="extras.js?v=mobile-v15"></script>
+  <script src="app.js?v=mobile-v16"></script>
+  <script src="extras.js?v=mobile-v16"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="export-excel.js?v=mobile-v16"></script>
 </body>
 </html>
