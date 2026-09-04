@@ -1,4 +1,4 @@
-const EXTRA_STORAGE_KEY='viajecillos-v1-extra-expenses';
+const EXTRA_STORAGE_KEY='viajecillos-v2-extra-expenses';
 
 // La última hoja de Excel de Líder 2 tiene 11 filas de trabajo y no incluye
 // el traslado Huaraz → Chimbote como un día independiente. Lo quitamos del
