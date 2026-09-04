@@ -1,5 +1,20 @@
 const EXTRA_STORAGE_KEY='viajecillos-v1-extra-expenses';
-const BASELINE_PROJECTED_SPEND=5408.73;
+
+// La última hoja de Excel de Líder 2 tiene 11 filas de trabajo y no incluye
+// el traslado Huaraz → Chimbote como un día independiente. Lo quitamos del
+// conjunto mostrado sin alterar el formato ni la lógica de registro de la app.
+const obsoleteTransferIndex=trip.findIndex(d=>d.place==='Traslado Huaraz → Chimbote');
+if(obsoleteTransferIndex>=0){
+  trip.splice(obsoleteTransferIndex,1);
+  currentIndex=firstPendingIndex();
+  if(els.daySelect){
+    els.daySelect.innerHTML=trip.map((d,i)=>`<option value="${i}">${formatDate(d.date)} · ${d.place}${isClosed(d)?' ✓':hasProgress(d)?' •':''}</option>`).join('');
+    els.daySelect.value=String(currentIndex);
+  }
+}
+
+// El estimado base ahora sale directamente de los datos vigentes de la última hoja.
+const BASELINE_PROJECTED_SPEND=sumTrip('target');
 let extraSaved=loadExtraExpenses();
 function loadExtraExpenses(){try{return JSON.parse(localStorage.getItem(EXTRA_STORAGE_KEY))||{}}catch{return {}}}
 function persistExtraExpenses(){localStorage.setItem(EXTRA_STORAGE_KEY,JSON.stringify(extraSaved))}
@@ -59,4 +74,4 @@ $('addExtraBtn')?.addEventListener('click',addExtra);
 $('daySelect')?.addEventListener('change',()=>setTimeout(renderExtraExpenses,0));
 const originalResetData=resetData;
 resetData=function(){originalResetData();extraSaved={};persistExtraExpenses();renderAll();renderExtraExpenses()}
-renderDashboard();renderDaySummary();renderTable();renderExtraExpenses();
+renderDashboard();renderDay();renderDaySummary();renderTable();renderExtraExpenses();
