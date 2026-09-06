@@ -32,6 +32,15 @@
     };
   }
 
+  function hasRegisteredData(data) {
+    return Boolean(
+      data && (
+        Object.keys(data.saved || {}).length ||
+        Object.keys(data.extraSaved || {}).length
+      )
+    );
+  }
+
   function queueSync() {
     if (!initialized || applyingRemote || !dataRef) return;
     clearTimeout(syncTimer);
@@ -74,7 +83,14 @@
             .catch(error => { console.warn('No se pudo crear el registro compartido:', error); showSyncMessage('Tus datos siguen guardados aquí. Falta activar Firebase para sincronizar.'); });
           return;
         }
-        applyRemote(snapshot.val());
+        const remoteData = snapshot.val();
+        if (!initialized && !hasRegisteredData(remoteData) && hasRegisteredData(snapshotData())) {
+          dataRef.transaction(current => hasRegisteredData(current) ? current : snapshotData())
+            .then(() => { initialized = true; showSyncMessage('Tus datos locales se sincronizaron.'); })
+            .catch(error => { console.warn('No se pudieron subir los datos locales:', error); });
+          return;
+        }
+        applyRemote(remoteData);
         initialized = true;
         showSyncMessage('Sincronizado en tiempo real.');
       }, error => {
