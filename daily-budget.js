@@ -3,6 +3,16 @@
   const FOOD_DAILY = 300;
   const weekday = iso => new Intl.DateTimeFormat('es-PE',{weekday:'short',timeZone:'UTC'}).format(new Date(`${iso}T00:00:00Z`)).replace('.','');
   const dayNumber = iso => new Intl.DateTimeFormat('es-PE',{day:'2-digit',timeZone:'UTC'}).format(new Date(`${iso}T00:00:00Z`));
+  const photoByPlace = d => {
+    const p=(d.place||'').toLowerCase();
+    if(p.includes('huaraz')) return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/Huarazperu.jpg?width=1600',credit:'Huaraz · Suizaperuana / Wikimedia Commons'};
+    if(p.includes('chimbote')) return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/Panoramica%20chimbote%20desde%20Cerro%20de%20la%20Paz.jpg?width=1800',credit:'Chimbote · Ed Pax / Wikimedia Commons'};
+    if(p.includes('chiclayo')) return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/Chiclayo%2C%20Plaza%20de%20Armas.jpg?width=1600',credit:'Chiclayo · Burkhard Mücke / Wikimedia Commons'};
+    if(p.includes('piura')) return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/PLAZA%20DE%20ARMAS%20DE%20PIURA%20-%20PIURA.jpg?width=1600',credit:'Piura · Edward J. Quevedo Macalupú / Wikimedia Commons'};
+    if(p.includes('sullana')) return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/Mirador%20de%20sullana.jpg?width=1400',credit:'Sullana · Arizias / Wikimedia Commons'};
+    if(p.includes('tumbes')) return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/Plazatumbes.JPG?width=1600',credit:'Tumbes · Chalisimo5 / Wikimedia Commons'};
+    return {url:'https://commons.wikimedia.org/wiki/Special:FilePath/Huaraz%20Peru%20Panor%C3%A1mica.jpg?width=1600',credit:'Norte del Perú · Wikimedia Commons'};
+  };
 
   const daysFor = (day, key, daily) => {
     const total = Number(day.gross?.[key]) || 0;
@@ -39,10 +49,6 @@
     if (els.dayMeta) {
       const old = els.dayMeta.querySelector('.daily-budget-breakdown');
       if (old) old.remove();
-      const box = document.createElement('div');
-      box.className = 'daily-budget-breakdown';
-      box.innerHTML = `<b>Presupuesto del día</b><span>🏨 ${budgetLine(d,'hotel',HOTEL_DAILY,'Hospedaje')}</span><span>🍽️ ${budgetLine(d,'food',FOOD_DAILY,'Alimentación')}</span>`;
-      els.dayMeta.appendChild(box);
     }
   };
 
@@ -64,10 +70,13 @@
         const closed = isClosed(d), progress = progressFor(d), actual = progress ? actualForRow(d) : null, target = sumObj(d.target);
         const savings = progress ? sumObj(d.gross)-actual : sumObj(d.gross)-target;
         const hDays = daysFor(d,'hotel',HOTEL_DAILY), fDays = daysFor(d,'food',FOOD_DAILY);
+        const photo=photoByPlace(d);
         let status='<span class="status pending">Pendiente</span>';
         if(progress&&!closed)status='<span class="status progress">En curso</span>';
         if(closed)status=actual<=sumObj(d.gross)?'<span class="status done">Completado</span>':'<span class="status over">Sobre presupuesto</span>';
-        return `<article class="trip-card">
+        return `<article class="trip-card trip-card-photo" style="--trip-photo:url('${photo.url}')">
+          <div class="trip-photo-credit">${photo.credit}</div>
+          <div class="trip-card-content">
           <div class="trip-card-head">
             <div class="trip-card-title"><div class="date-badge"><span>${weekday(d.date)}</span><b>${dayNumber(d.date)}</b><small>sep</small></div><div class="trip-card-copy"><strong>${d.place}</strong><small>${d.place.toLowerCase().includes('traslado')||d.place.toLowerCase().includes('salida')||d.place.toLowerCase().includes('retorno')?'📍 Traslado':'📍 '+(d.place.split('—')[0]||'Destino').trim()}</small></div></div>${status}
           </div>
@@ -78,6 +87,7 @@
             <div class="trip-card-stat total"><span>Total del día</span><b>${money(sumObj(d.gross))}</b><small>Mov. ${money(d.gross.mobility)}</small></div>
           </div>
           <div class="trip-card-footer"><div class="trip-card-savings">${progress?'Ahorro actual':'Ahorro estimado'}: <b class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</b>${progress?` · Gastado ${money(actual)}`:''}</div><button class="trip-card-action" type="button" data-register-day="${i}">${closed?'Ver / corregir':'＋ Registrar gasto'}</button></div>
+          </div>
         </article>`;
       }).join('');
       els.cards.querySelectorAll('[data-register-day]').forEach(btn=>btn.addEventListener('click',()=>goToRegister(Number(btn.dataset.registerDay))));
