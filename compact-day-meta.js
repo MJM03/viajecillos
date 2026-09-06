@@ -42,15 +42,21 @@ function resetCurrentDay(){
 
 function ensureResetDayButton(){
   const actions=document.querySelector('.day-actions');
-  if(!actions||$('resetDayBtn'))return;
-  const btn=document.createElement('button');
-  btn.id='resetDayBtn';
-  btn.type='button';
-  btn.className='secondary-btn danger-soft';
-  btn.textContent='Reiniciar día';
-  btn.setAttribute('aria-label','Reiniciar únicamente el día seleccionado');
-  btn.addEventListener('click',resetCurrentDay);
-  actions.appendChild(btn);
+  if(!actions)return;
+  let btn=$('resetDayBtn');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='resetDayBtn';
+    btn.type='button';
+    btn.className='secondary-btn danger-soft';
+    btn.textContent='Reiniciar día';
+    btn.setAttribute('aria-label','Reiniciar únicamente el día seleccionado');
+    actions.appendChild(btn);
+  }
+  if(btn.dataset.resetBound!=='1'){
+    btn.addEventListener('click',resetCurrentDay);
+    btn.dataset.resetBound='1';
+  }
 }
 
 ensureResetDayButton();
