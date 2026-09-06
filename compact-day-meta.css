@@ -1,0 +1,11 @@
+@media(max-width:600px){
+.day-meta{padding:10px 12px!important;border-radius:14px!important;background:#f7f9fc!important;border:1px solid #e5e9f0!important}
+.day-meta-compact{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.day-meta-compact strong{font-size:12px;line-height:1.2;color:#344054}
+.day-meta-compact span{font-size:10px;color:#748096;white-space:nowrap}
+.day-meta-compact span:last-child{grid-column:1/-1}
+.day-meta.is-closed{background:#f3faf6!important;border-color:#d8efe1!important}
+.day-meta.is-closed .day-meta-compact strong{color:#16803c}
+.day-meta.is-progress{background:#fff8ef!important;border-color:#f5dfbc!important}
+.day-meta.is-progress .day-meta-compact strong{color:#b45309}
+}
