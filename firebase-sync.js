@@ -4,13 +4,14 @@
     apiKey: 'AIzaSyDR9a1wkVlx1k4NqHQ8Gp4DZHWy1ZBFM3E',
     authDomain: 'viajecillos-d57ea.firebaseapp.com',
     projectId: 'viajecillos-d57ea',
+    databaseURL: 'https://viajecillos-d57ea-default-rtdb.firebaseio.com',
     storageBucket: 'viajecillos-d57ea.firebasestorage.app',
     messagingSenderId: '28873014473',
     appId: '1:28873014473:web:8308c5a8b617e7d019e118'
   };
   const COLLECTION = 'viajecillosShared';
   const DOCUMENT = 'viaje-norte-lider-2-2026';
-  let db, docRef, applyingRemote = false, initialized = false, syncTimer;
+  let db, dataRef, applyingRemote = false, initialized = false, syncTimer;
 
   const localPersistMain = persist;
   const localPersistExtras = persistExtraExpenses;
@@ -32,11 +33,11 @@
   }
 
   function queueSync() {
-    if (!initialized || applyingRemote || !docRef) return;
+    if (!initialized || applyingRemote || !dataRef) return;
     clearTimeout(syncTimer);
     syncTimer = setTimeout(async () => {
       try {
-        await docRef.set(snapshotData(), { merge: true });
+        await dataRef.set(snapshotData());
         showSyncMessage('Guardado y sincronizado en todos los dispositivos.');
       } catch (error) {
         console.warn('No se pudo sincronizar todavía:', error);
@@ -65,21 +66,13 @@
     try {
       firebase.initializeApp(firebaseConfig);
       await firebase.auth().signInAnonymously();
-      db = firebase.firestore();
-      docRef = db.collection(COLLECTION).doc(DOCUMENT);
-      docRef.onSnapshot(async (snapshot) => {
+      db = firebase.database();
+      dataRef = db.ref(`${COLLECTION}/${DOCUMENT}`);
+      dataRef.on('value', snapshot => {
         if (!snapshot.exists) {
-          try {
-            await db.runTransaction(async transaction => {
-              const latest = await transaction.get(docRef);
-              if (!latest.exists) transaction.set(docRef, snapshotData());
-            });
-            initialized = true;
-            showSyncMessage('Datos iniciales sincronizados.');
-          } catch (error) {
-            console.warn('No se pudo crear el registro compartido:', error);
-            showSyncMessage('Tus datos siguen guardados aquí. Falta activar Firebase para sincronizar.');
-          }
+          dataRef.transaction(current => current === null ? snapshotData() : current)
+            .then(() => { initialized = true; showSyncMessage('Datos iniciales sincronizados.'); })
+            .catch(error => { console.warn('No se pudo crear el registro compartido:', error); showSyncMessage('Tus datos siguen guardados aquí. Falta activar Firebase para sincronizar.'); });
           return;
         }
         applyRemote(snapshot.data());
