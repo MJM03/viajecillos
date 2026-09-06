@@ -1,5 +1,33 @@
 # Viajecillos
 
+## Sincronización entre dispositivos
+
+La app ya está preparada para compartir los gastos en tiempo real con Firebase,
+sin mostrar una pantalla de inicio de sesión. Antes de usarla en más de un
+dispositivo, activa estos dos servicios en el proyecto `viajecillos-d57ea`:
+
+1. **Authentication → Sign-in method → Anonymous**: activar.
+2. **Firestore Database → Create database**: crearla en modo producción y pegar
+   estas reglas en la pestaña **Rules**:
+
+```text
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /viajecillosShared/viaje-norte-lider-2-2026 {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+```
+
+También agrega `mjm03.github.io` en **Authentication → Settings → Authorized
+domains**, para que funcione desde GitHub Pages.
+
+Mientras Firebase no esté activo o no haya internet, los gastos siguen
+guardándose en el dispositivo y se intentan sincronizar cuando la conexión se
+recupere.
+
 Web móvil para controlar los viáticos reales del viaje Norte (Líder 2) del 6 al 20 de septiembre de 2026.
 
 ## V1
