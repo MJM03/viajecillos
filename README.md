@@ -3,27 +3,21 @@
 ## Sincronización entre dispositivos
 
 La app ya está preparada para compartir los gastos en tiempo real con Firebase,
-sin mostrar una pantalla de inicio de sesión. Antes de usarla en más de un
-dispositivo, activa estos dos servicios en el proyecto `viajecillos-d57ea`:
-
-1. **Authentication → Sign-in method → Anonymous**: activar.
-2. **Realtime Database → Rules**: pegar estas reglas y pulsar **Publish**:
+sin inicio de sesión. Antes de usarla en más de un dispositivo, abre
+**Realtime Database → Rules**, pega estas reglas y pulsa **Publish**:
 
 ```text
 {
   "rules": {
     "viajecillosShared": {
       "viaje-norte-lider-2-2026": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": true,
+        ".write": true
       }
     }
   }
 }
 ```
-
-También agrega `mjm03.github.io` en **Authentication → Settings → Authorized
-domains**, para que funcione desde GitHub Pages.
 
 Mientras Firebase no esté activo o no haya internet, los gastos siguen
 guardándose en el dispositivo y se intentan sincronizar cuando la conexión se
