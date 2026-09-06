@@ -9,14 +9,34 @@ function actualTotalWithExtras(day){return sumObj(actualFor(day))+extraTotal(day
 function hasAnyProgress(day){return hasProgress(day)||extrasFor(day).length>0}
 function budgetSavingsFor(day,spent){return sumObj(day.gross)-(Number(spent)||0)}
 function projectedTotalWithExtras(){return trip.reduce((total,d)=>{const target=sumObj(d.target);if(isClosed(d))return total+(actualTotalWithExtras(d)-target);if(hasAnyProgress(d))return total+(Math.max(target,actualTotalWithExtras(d))-target);return total},BASELINE_PROJECTED_SPEND)}
+function realisticProjection(){
+ const closed=trip.filter(isClosed);
+ if(!closed.length){const spent=projectedTotalWithExtras();return {spent,savings:sumTrip('gross')-spent,factor:1,days:0}}
+ const closedTarget=closed.reduce((s,d)=>s+sumObj(d.target),0);
+ const closedActual=closed.reduce((s,d)=>s+actualTotalWithExtras(d),0);
+ const factor=closedTarget>0?closedActual/closedTarget:1;
+ const spent=trip.reduce((total,d)=>{
+   const target=sumObj(d.target),actual=actualTotalWithExtras(d);
+   if(isClosed(d))return total+actual;
+   const projected=Math.max(0,target*factor);
+   if(hasAnyProgress(d))return total+Math.max(actual,projected);
+   return total+projected;
+ },0);
+ return {spent,savings:sumTrip('gross')-spent,factor,days:closed.length};
+}
 function allExtraItems(){return trip.flatMap(d=>extrasFor(d).map(x=>({date:d.date,place:d.place,description:x.description||'Gasto extra',amount:Number(x.amount)||0})))}
 function renderExtraSummary(){const list=$('extraSummaryList'),totalEl=$('extraGrandTotal'),countEl=$('extraCount');if(!list||!totalEl||!countEl)return;const items=allExtraItems(),total=items.reduce((s,x)=>s+x.amount,0);totalEl.textContent=money(total);countEl.textContent=`${items.length} ${items.length===1?'gasto':'gastos'}`;list.innerHTML=items.length?items.map(x=>`<div class="extra-summary-item"><div><b>${escapeHtml(x.description)}</b><small>${formatDate(x.date)} · ${escapeHtml(x.place)}</small></div><strong>${money(x.amount)}</strong></div>`).join(''):'<p class="extra-summary-empty">No hay gastos extra registrados.</p>'}
 const originalRenderDashboard=renderDashboard;
 renderDashboard=function(){
- const totalGross=sumTrip('gross'),totalNet=sumTrip('net'),closed=trip.filter(isClosed),withProgress=trip.filter(hasAnyProgress),strictSpend=closed.reduce((s,d)=>s+sumObj(d.gross),0),actualSpent=withProgress.reduce((s,d)=>s+actualTotalWithExtras(d),0),registeredSavings=withProgress.reduce((s,d)=>s+budgetSavingsFor(d,actualTotalWithExtras(d)),0),projectedSpent=projectedTotalWithExtras(),projectedSavings=totalGross-projectedSpent,done=closed.length,inProgress=trip.filter(d=>hasAnyProgress(d)&&!isClosed(d)).length,usage=totalGross?projectedSpent/totalGross*100:0,remaining=totalGross-actualSpent;
+ const totalGross=sumTrip('gross'),totalNet=sumTrip('net'),closed=trip.filter(isClosed),withProgress=trip.filter(hasAnyProgress),strictSpend=closed.reduce((s,d)=>s+sumObj(d.gross),0),actualSpent=withProgress.reduce((s,d)=>s+actualTotalWithExtras(d),0),registeredSavings=withProgress.reduce((s,d)=>s+budgetSavingsFor(d,actualTotalWithExtras(d)),0),maxProjectedSpent=projectedTotalWithExtras(),maxProjectedSavings=totalGross-maxProjectedSpent,realistic=realisticProjection(),done=closed.length,inProgress=trip.filter(d=>hasAnyProgress(d)&&!isClosed(d)).length,realisticUsage=totalGross?realistic.spent/totalGross*100:0,remaining=totalGross-actualSpent;
  $('realSavings').textContent=money(registeredSavings);$('realSavingsPerson').textContent=`${money(registeredSavings/PEOPLE)} por persona`;$('realSavings')?.closest('.kpi-card')?.classList.toggle('is-negative',registeredSavings<0);
- $('projectedSavings').textContent=money(projectedSavings);$('projectedSavingsPerson').textContent=`${money(projectedSavings/PEOPLE)} por persona`;$('actualSpent').textContent=money(actualSpent);$('daysDone').textContent=`${done} cerrados${inProgress?` · ${inProgress} en curso`:''}`;$('projectedSpent').textContent=money(projectedSpent);$('budgetUsage').textContent=`${usage.toFixed(1)}% del presupuesto`;
- $('grossBudgetLabel').textContent=money(totalGross);$('netBudgetLabel').textContent='Presupuesto total';$('netBudgetText').textContent=money(totalNet);$('progressBar').style.width=`${Math.max(0,Math.min(100,usage))}%`;
+ $('projectedSavings').textContent=money(realistic.savings);$('projectedSavingsPerson').textContent=`${money(realistic.savings/PEOPLE)} por persona`;$('projectedSavings')?.closest('.kpi-card')?.classList.toggle('is-negative',realistic.savings<0);
+ if($('realisticBasis'))$('realisticBasis').textContent=realistic.days?`Basado en ${realistic.days} ${realistic.days===1?'día cerrado':'días cerrados'} · ritmo ${(realistic.factor*100).toFixed(0)}% de la meta`:'Aún sin días cerrados · usando la meta inicial';
+ if($('maxProjectedSavings'))$('maxProjectedSavings').textContent=money(maxProjectedSavings);
+ if($('maxProjectedSavingsPerson'))$('maxProjectedSavingsPerson').textContent=`${money(maxProjectedSavings/PEOPLE)} por persona`;
+ $('actualSpent').textContent=money(actualSpent);$('daysDone').textContent=`${done} cerrados${inProgress?` · ${inProgress} en curso`:''}`;
+ $('projectedSpent').textContent=money(realistic.spent);$('budgetUsage').textContent=`${realisticUsage.toFixed(1)}% del presupuesto · proyección realista`;
+ $('grossBudgetLabel').textContent=money(totalGross);$('netBudgetLabel').textContent='Presupuesto total';$('netBudgetText').textContent=money(totalNet);$('progressBar').style.width=`${Math.max(0,Math.min(100,realisticUsage))}%`;
  if($('strictSpend'))$('strictSpend').textContent=money(strictSpend);
  if($('strictSpendPerson'))$('strictSpendPerson').textContent=`${done} ${done===1?'día cerrado':'días cerrados'} · presupuesto real acumulado`;
  if($('accountRemaining')){$('accountRemaining').textContent=money(remaining);$('accountRemaining').closest('.budget-master-card')?.classList.toggle('is-negative',remaining<0)}
