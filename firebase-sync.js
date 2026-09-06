@@ -68,7 +68,7 @@
       db = firebase.database();
       dataRef = db.ref(`${COLLECTION}/${DOCUMENT}`);
       dataRef.on('value', snapshot => {
-        if (!snapshot.exists) {
+        if (!snapshot.exists()) {
           dataRef.transaction(current => current === null ? snapshotData() : current)
             .then(() => { initialized = true; showSyncMessage('Datos iniciales sincronizados.'); })
             .catch(error => { console.warn('No se pudo crear el registro compartido:', error); showSyncMessage('Tus datos siguen guardados aquí. Falta activar Firebase para sincronizar.'); });
