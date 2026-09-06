@@ -7,15 +7,16 @@ sin mostrar una pantalla de inicio de sesión. Antes de usarla en más de un
 dispositivo, activa estos dos servicios en el proyecto `viajecillos-d57ea`:
 
 1. **Authentication → Sign-in method → Anonymous**: activar.
-2. **Firestore Database → Create database**: crearla en modo producción y pegar
-   estas reglas en la pestaña **Rules**:
+2. **Realtime Database → Rules**: pegar estas reglas y pulsar **Publish**:
 
 ```text
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /viajecillosShared/viaje-norte-lider-2-2026 {
-      allow read, write: if request.auth != null;
+{
+  "rules": {
+    "viajecillosShared": {
+      "viaje-norte-lider-2-2026": {
+        ".read": "auth != null",
+        ".write": "auth != null"
+      }
     }
   }
 }
