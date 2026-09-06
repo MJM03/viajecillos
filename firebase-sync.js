@@ -65,7 +65,6 @@
   async function start() {
     try {
       firebase.initializeApp(firebaseConfig);
-      await firebase.auth().signInAnonymously();
       db = firebase.database();
       dataRef = db.ref(`${COLLECTION}/${DOCUMENT}`);
       dataRef.on('value', snapshot => {
