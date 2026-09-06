@@ -24,19 +24,6 @@
     if(typeof showScreen==='function') showScreen('registrar');
   }
 
-  function renderDayStrip(){
-    const strip=document.getElementById('dayStrip');
-    if(!strip) return;
-    strip.innerHTML=trip.map((d,i)=>`<button class="day-chip ${i===currentIndex?'active':''} ${hasProgress(d)?'has-progress':''}" type="button" data-day-chip="${i}"><span>${weekday(d.date)}</span><b>${dayNumber(d.date)}</b><small>sep</small></button>`).join('');
-    strip.querySelectorAll('[data-day-chip]').forEach(btn=>btn.addEventListener('click',()=>{
-      currentIndex=Number(btn.dataset.dayChip);
-      if(els.daySelect) els.daySelect.value=String(currentIndex);
-      renderDay();renderDayStrip();
-      document.querySelectorAll('.trip-card').forEach((card,i)=>card.classList.toggle('is-selected',i===currentIndex));
-    }));
-    strip.querySelector('.day-chip.active')?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
-  }
-
   const previousRenderDay = renderDay;
   renderDay = function () {
     previousRenderDay();
@@ -57,7 +44,6 @@
       box.innerHTML = `<b>Presupuesto del día</b><span>🏨 ${budgetLine(d,'hotel',HOTEL_DAILY,'Hospedaje')}</span><span>🍽️ ${budgetLine(d,'food',FOOD_DAILY,'Alimentación')}</span>`;
       els.dayMeta.appendChild(box);
     }
-    renderDayStrip();
   };
 
   renderTable = function () {
@@ -81,7 +67,7 @@
         let status='<span class="status pending">Pendiente</span>';
         if(progress&&!closed)status='<span class="status progress">En curso</span>';
         if(closed)status=actual<=sumObj(d.gross)?'<span class="status done">Completado</span>':'<span class="status over">Sobre presupuesto</span>';
-        return `<article class="trip-card ${i===currentIndex?'is-selected':''}">
+        return `<article class="trip-card">
           <div class="trip-card-head">
             <div class="trip-card-title"><div class="date-badge"><span>${weekday(d.date)}</span><b>${dayNumber(d.date)}</b><small>sep</small></div><div class="trip-card-copy"><strong>${d.place}</strong><small>${d.place.toLowerCase().includes('traslado')||d.place.toLowerCase().includes('salida')||d.place.toLowerCase().includes('retorno')?'📍 Traslado':'📍 '+(d.place.split('—')[0]||'Destino').trim()}</small></div></div>${status}
           </div>
@@ -96,10 +82,8 @@
       }).join('');
       els.cards.querySelectorAll('[data-register-day]').forEach(btn=>btn.addEventListener('click',()=>goToRegister(Number(btn.dataset.registerDay))));
     }
-    renderDayStrip();
   };
 
-  document.getElementById('daySelect')?.addEventListener('change',()=>setTimeout(renderDayStrip,0));
   renderDay();
   renderTable();
 })();
