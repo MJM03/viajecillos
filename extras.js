@@ -27,6 +27,7 @@ renderDashboard=function(){
   const projectedSpent=projectedTotalWithExtras();
   const projectedSavings=totalGross-projectedSpent,done=closed.length,inProgress=trip.filter(d=>hasAnyProgress(d)&&!isClosed(d)).length,usage=totalGross?projectedSpent/totalGross*100:0;
   $('realSavings').textContent=money(registeredSavings);$('realSavingsPerson').textContent=`${money(registeredSavings/PEOPLE)} por persona`;
+  $('realSavings')?.closest('.kpi-card')?.classList.toggle('is-negative',registeredSavings<0);
   $('projectedSavings').textContent=money(projectedSavings);$('projectedSavingsPerson').textContent=`${money(projectedSavings/PEOPLE)} por persona`;
   $('actualSpent').textContent=money(actualSpent);$('daysDone').textContent=`${done} cerrados${inProgress?` · ${inProgress} en curso`:''}`;
   $('projectedSpent').textContent=money(projectedSpent);$('budgetUsage').textContent=`${usage.toFixed(1)}% del presupuesto`;
