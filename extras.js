@@ -9,6 +9,7 @@ function extrasFor(day){return Array.isArray(extraSaved[day.date])?extraSaved[da
 function extraTotal(day){return extrasFor(day).reduce((s,x)=>s+(Number(x.amount)||0),0)}
 function actualTotalWithExtras(day){return sumObj(actualFor(day))+extraTotal(day)}
 function hasAnyProgress(day){return hasProgress(day)||extrasFor(day).length>0}
+function budgetSavingsFor(day,spent){return sumObj(day.gross)-(Number(spent)||0)}
 function projectedTotalWithExtras(){
   return trip.reduce((total,d)=>{
     const target=sumObj(d.target);
@@ -22,20 +23,20 @@ const originalRenderDashboard=renderDashboard;
 renderDashboard=function(){
   const totalGross=sumTrip('gross'),totalNet=sumTrip('net'),closed=trip.filter(isClosed),withProgress=trip.filter(hasAnyProgress);
   const actualSpent=withProgress.reduce((s,d)=>s+actualTotalWithExtras(d),0);
-  const registeredSavings=withProgress.reduce((s,d)=>s+sumObj(d.net)-actualTotalWithExtras(d),0);
+  const registeredSavings=withProgress.reduce((s,d)=>s+budgetSavingsFor(d,actualTotalWithExtras(d)),0);
   const projectedSpent=projectedTotalWithExtras();
-  const projectedSavings=totalNet-projectedSpent,done=closed.length,inProgress=trip.filter(d=>hasAnyProgress(d)&&!isClosed(d)).length,usage=totalNet?projectedSpent/totalNet*100:0;
+  const projectedSavings=totalGross-projectedSpent,done=closed.length,inProgress=trip.filter(d=>hasAnyProgress(d)&&!isClosed(d)).length,usage=totalGross?projectedSpent/totalGross*100:0;
   $('realSavings').textContent=money(registeredSavings);$('realSavingsPerson').textContent=`${money(registeredSavings/PEOPLE)} por persona`;
   $('projectedSavings').textContent=money(projectedSavings);$('projectedSavingsPerson').textContent=`${money(projectedSavings/PEOPLE)} por persona`;
   $('actualSpent').textContent=money(actualSpent);$('daysDone').textContent=`${done} cerrados${inProgress?` · ${inProgress} en curso`:''}`;
-  $('projectedSpent').textContent=money(projectedSpent);$('budgetUsage').textContent=`${usage.toFixed(1)}% del disponible`;
+  $('projectedSpent').textContent=money(projectedSpent);$('budgetUsage').textContent=`${usage.toFixed(1)}% del presupuesto`;
   $('grossBudgetLabel').textContent=money(totalGross);$('netBudgetLabel').textContent='Presupuesto total';$('netBudgetText').textContent=money(totalNet);$('progressBar').style.width=`${Math.max(0,Math.min(100,usage))}%`;
 }
 
 const originalRenderDaySummary=renderDaySummary;
 renderDaySummary=function(){
-  const d=trip[currentIndex],actual=readInputs(),target=sumObj(d.target),net=sumObj(d.net),extras=extraTotal(d),act=sumObj(actual)+extras,savings=net-act;
-  $('daySummary').innerHTML=`<div class="mini-stat"><span>Gasto estimado</span><strong>${money(target)}</strong></div><div class="mini-stat"><span>Ingresado</span><strong>${money(act)}</strong>${extras?`<small> · extras ${money(extras)}</small>`:''}</div><div class="mini-stat ${act<=target?'positive':'negative'}"><span>Vs. estimado</span><strong>${act<=target?'+':''}${money(target-act)}</strong></div><div class="mini-stat ${savings>=0?'positive':'negative'}"><span>Ahorro hasta ahora</span><strong>${money(savings)}</strong><small> · ${money(savings/PEOPLE)} c/u</small></div>`;
+  const d=trip[currentIndex],actual=readInputs(),target=sumObj(d.target),gross=sumObj(d.gross),extras=extraTotal(d),act=sumObj(actual)+extras,savings=gross-act;
+  $('daySummary').innerHTML=`<div class="mini-stat"><span>Gasto estimado</span><strong>${money(target)}</strong></div><div class="mini-stat"><span>Ingresado</span><strong>${money(act)}</strong>${extras?`<small> · extras ${money(extras)}</small>`:''}</div><div class="mini-stat ${act<=gross?'positive':'negative'}"><span>Vs. presupuesto</span><strong>${act<=gross?'+':''}${money(gross-act)}</strong></div><div class="mini-stat ${savings>=0?'positive':'negative'}"><span>Ahorro hasta ahora</span><strong>${money(savings)}</strong><small> · ${money(savings/PEOPLE)} c/u</small></div>`;
 }
 
 const originalRenderDay=renderDay;
@@ -43,8 +44,8 @@ renderDay=function(){originalRenderDay();renderExtraExpenses()}
 
 const originalRenderTable=renderTable;
 renderTable=function(){
-  els.table.innerHTML=trip.map(d=>{const closed=isClosed(d),progress=hasAnyProgress(d),actual=progress?actualTotalWithExtras(d):null,target=sumObj(d.target),savings=progress?sumObj(d.net)-actual:plannedSavings(d);let status='<span class="status pending">Pendiente</span>';if(progress&&!closed)status='<span class="status progress">En curso</span>';if(closed)status=actual<=target?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre estimado</span>';return `<tr><td>${formatDate(d.date)}</td><td>${d.place}</td><td>${money(target)}</td><td>${progress?money(actual):'—'}</td><td class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</td><td>${status}</td></tr>`}).join('');
-  if(els.cards)els.cards.innerHTML=trip.map(d=>{const closed=isClosed(d),progress=hasAnyProgress(d),actual=progress?actualTotalWithExtras(d):null,target=sumObj(d.target),savings=progress?sumObj(d.net)-actual:plannedSavings(d),extras=extraTotal(d);let status='<span class="status pending">Pendiente</span>';if(progress&&!closed)status='<span class="status progress">En curso</span>';if(closed)status=actual<=target?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre estimado</span>';const subtitle=closed?'Día cerrado':progress?'Gastos guardados, día abierto':'Aún sin gastos registrados';return `<article class="trip-card"><div class="trip-card-head"><div><strong>${formatDate(d.date)} · ${d.place}</strong><small>${subtitle}${extras?` · Extras ${money(extras)}`:''}</small></div>${status}</div><div class="trip-card-stats"><div class="trip-card-stat"><span>Estimado</span><b>${money(target)}</b></div><div class="trip-card-stat"><span>Real</span><b>${progress?money(actual):'—'}</b></div><div class="trip-card-stat"><span>${progress?'Ahorro actual':'Ahorro estimado'}</span><b class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</b></div></div></article>`}).join('');
+  els.table.innerHTML=trip.map(d=>{const closed=isClosed(d),progress=hasAnyProgress(d),actual=progress?actualTotalWithExtras(d):null,target=sumObj(d.target),savings=progress?budgetSavingsFor(d,actual):sumObj(d.gross)-target;let status='<span class="status pending">Pendiente</span>';if(progress&&!closed)status='<span class="status progress">En curso</span>';if(closed)status=actual<=sumObj(d.gross)?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre presupuesto</span>';return `<tr><td>${formatDate(d.date)}</td><td>${d.place}</td><td>${money(target)}</td><td>${progress?money(actual):'—'}</td><td class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</td><td>${status}</td></tr>`}).join('');
+  if(els.cards)els.cards.innerHTML=trip.map(d=>{const closed=isClosed(d),progress=hasAnyProgress(d),actual=progress?actualTotalWithExtras(d):null,target=sumObj(d.target),savings=progress?budgetSavingsFor(d,actual):sumObj(d.gross)-target,extras=extraTotal(d);let status='<span class="status pending">Pendiente</span>';if(progress&&!closed)status='<span class="status progress">En curso</span>';if(closed)status=actual<=sumObj(d.gross)?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre presupuesto</span>';const subtitle=closed?'Día cerrado':progress?'Gastos guardados, día abierto':'Aún sin gastos registrados';return `<article class="trip-card"><div class="trip-card-head"><div><strong>${formatDate(d.date)} · ${d.place}</strong><small>${subtitle}${extras?` · Extras ${money(extras)}`:''}</small></div>${status}</div><div class="trip-card-stats"><div class="trip-card-stat"><span>Estimado</span><b>${money(target)}</b></div><div class="trip-card-stat"><span>Real</span><b>${progress?money(actual):'—'}</b></div><div class="trip-card-stat"><span>${progress?'Ahorro actual':'Ahorro estimado'}</span><b class="${savings>=0?'money-good':'money-bad'}">${money(savings)}</b></div></div></article>`}).join('');
 }
 
 function renderExtraExpenses(){
