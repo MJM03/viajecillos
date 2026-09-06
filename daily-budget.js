@@ -25,10 +25,10 @@
     const foodDays = daysFor(d, 'food', FOOD_DAILY);
 
     if (els.hints?.hotel) {
-      els.hints.hotel.textContent = `${hotelDays} ${plural(hotelDays)} × ${money(HOTEL_DAILY)} · Disp. ${money(d.net.hotel)}`;
+      els.hints.hotel.textContent = `${hotelDays} ${plural(hotelDays)} × ${money(HOTEL_DAILY)} · Presupuesto ${money(d.gross.hotel)}`;
     }
     if (els.hints?.food) {
-      els.hints.food.textContent = `${foodDays} ${plural(foodDays)} × ${money(FOOD_DAILY)} · Disp. ${money(d.net.food)}`;
+      els.hints.food.textContent = `${foodDays} ${plural(foodDays)} × ${money(FOOD_DAILY)} · Presupuesto ${money(d.gross.food)}`;
     }
 
     if (els.dayMeta) {
@@ -49,7 +49,8 @@
       els.table.innerHTML = trip.map(d => {
         const progress = progressFor(d);
         const actual = progress ? actualForRow(d) : null;
-        const savings = progress ? sumObj(d.net) - actual : plannedSavings(d);
+        const target = sumObj(d.target);
+        const savings = progress ? sumObj(d.gross) - actual : sumObj(d.gross) - target;
         const hDays = daysFor(d,'hotel',HOTEL_DAILY);
         const fDays = daysFor(d,'food',FOOD_DAILY);
         return `<tr>
@@ -68,12 +69,13 @@
     if (els.cards) {
       els.cards.innerHTML = trip.map(d => {
         const closed = isClosed(d), progress = progressFor(d), actual = progress ? actualForRow(d) : null;
-        const savings = progress ? sumObj(d.net)-actual : plannedSavings(d);
+        const target = sumObj(d.target);
+        const savings = progress ? sumObj(d.gross)-actual : sumObj(d.gross)-target;
         const hDays = daysFor(d,'hotel',HOTEL_DAILY);
         const fDays = daysFor(d,'food',FOOD_DAILY);
         let status='<span class="status pending">Pendiente</span>';
         if(progress&&!closed)status='<span class="status progress">En curso</span>';
-        if(closed)status=actual<=sumObj(d.target)?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre estimado</span>';
+        if(closed)status=actual<=sumObj(d.gross)?'<span class="status done">Cerrado</span>':'<span class="status over">Sobre presupuesto</span>';
         return `<article class="trip-card">
           <div class="trip-card-head"><div><strong>${formatDate(d.date)} · ${d.place}</strong><small>Presupuesto asignado ${money(sumObj(d.gross))}</small></div>${status}</div>
           <div class="trip-card-stats">
