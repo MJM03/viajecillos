@@ -23,17 +23,34 @@
 
   function codeFor(day) {
     const parts = day.place.split('—');
-    return (parts[1] || '').trim().split('/')[0].trim();
+    const code = (parts[1] || '').trim().split('/')[0].trim();
+    return /^[A-Z]\d+$/i.test(code) ? code : 'TRASLADO';
   }
+  function infoFor(day) {
+    const code=codeFor(day);
+    if(meta[code]) return meta[code];
+    if(day.place.includes('Lima → Huaraz')) return {description:'Salida Lima → Huaraz',city:'Huaraz'};
+    if(day.place.includes('Huaraz → Chimbote')) return {description:'Traslado Huaraz → Chimbote',city:'Chimbote'};
+    if(day.place.includes('Tumbes → Lima')) return {description:'Retorno Tumbes → Lima',city:'Lima'};
+    return {description:day.place,city:''};
+  }
+  function hasSaved(day){return Boolean(saved?.[day.date]?.actual);}
   function groupValue(day, key) {
     const progress = saved?.[day.date]?.actual;
     if (progress && Number.isFinite(Number(progress[key]))) return Number(progress[key]);
     return Number(day.target[key]) || 0;
   }
-  function extrasAmount() {
-    if (typeof extraSaved === 'undefined') return 0;
-    return Object.values(extraSaved).flat().reduce((s, x) => s + (Number(x?.amount) || 0), 0);
+  function stateFor(day){
+    if(saved?.[day.date]?.closed) return 'Cerrado';
+    if(hasSaved(day)) return 'En curso';
+    return 'Pendiente';
   }
+  function extraListFor(day){
+    if(typeof extraSaved==='undefined') return [];
+    return Array.isArray(extraSaved[day.date]) ? extraSaved[day.date] : [];
+  }
+  function extraTotalFor(day){return extraListFor(day).reduce((s,x)=>s+(Number(x?.amount)||0),0);}
+  function extrasAmount() {return trip.reduce((s,d)=>s+extraTotalFor(d),0);}
   function styleCell(cell, opts = {}) {
     if (opts.bold) cell.font = { ...(cell.font || {}), bold:true, color:opts.fontColor ? {argb:opts.fontColor} : undefined, size:opts.fontSize };
     if (opts.fill) cell.fill = {type:'pattern',pattern:'solid',fgColor:{argb:opts.fill}};
@@ -51,7 +68,7 @@
     const ws=wb.addWorksheet('V1 OPTIMIZADA',{views:[{state:'frozen',ySplit:3,xSplit:4}]});
 
     ws.mergeCells('A1:AB1');
-    ws.getCell('A1').value='LÍDER 2 — VIÁTICOS OPTIMIZADOS (PRESUPUESTO DIARIO)';
+    ws.getCell('A1').value='LÍDER 2 — VIÁTICOS OPTIMIZADOS (DATOS APP + FÓRMULAS)';
     styleCell(ws.getCell('A1'),{fill:'1F4E78',bold:true,fontColor:'FFFFFFFF',fontSize:15,align:'center'});
     ws.getRow(1).height=26;
 
@@ -66,20 +83,21 @@
 
     const blocks=[{key:'transport',start:5},{key:'hotel',start:11},{key:'food',start:17},{key:'mobility',start:23}];
     trip.forEach((day,idx)=>{
-      const r=4+idx, code=codeFor(day);
-      const info=meta[code]||{description:day.place,city:''};
+      const r=4+idx, code=codeFor(day), info=infoFor(day), savedDay=hasSaved(day);
       ws.getCell(r,1).value=new Date(`${day.date}T00:00:00Z`); ws.getCell(r,1).numFmt='dd/mm/yyyy';
       ws.getCell(r,2).value=code;
       ws.getCell(r,3).value=info.description;
       ws.getCell(r,4).value=info.city;
       blocks.forEach(({key,start})=>{
         const gross=Number(day.gross[key])||0, group=groupValue(day,key);
-        ws.getCell(r,start).value=gross;
-        ws.getCell(r,start+1).value={formula:`${ws.getCell(r,start).address}*18%`};
-        ws.getCell(r,start+2).value={formula:`${ws.getCell(r,start).address}-${ws.getCell(r,start+1).address}`};
-        ws.getCell(r,start+3).value={formula:`${ws.getCell(r,start+4).address}/6`};
-        ws.getCell(r,start+4).value=group;
-        ws.getCell(r,start+5).value={formula:`${ws.getCell(r,start+2).address}-${ws.getCell(r,start+4).address}`};
+        const budgetCell=ws.getCell(r,start), igvCell=ws.getCell(r,start+1), freeCell=ws.getCell(r,start+2), personCell=ws.getCell(r,start+3), groupCell=ws.getCell(r,start+4), saveCell=ws.getCell(r,start+5);
+        budgetCell.value=gross;
+        igvCell.value={formula:`${budgetCell.address}*18%`};
+        freeCell.value={formula:`${budgetCell.address}-${igvCell.address}`};
+        groupCell.value=group;
+        personCell.value={formula:`${groupCell.address}/6`};
+        saveCell.value={formula:`${freeCell.address}-${groupCell.address}`};
+        groupCell.note=savedDay?'Dato real guardado en la app.':'Proyección/meta porque este día aún no tiene gastos guardados.';
       });
       for(let c=1;c<=28;c++){styleCell(ws.getCell(r,c),{align:c<=4?'left':'right'});if(c>=5)ws.getCell(r,c).numFmt='S/ #,##0.00';}
     });
@@ -117,18 +135,37 @@
     [[r1,2],[r2,2],[r3,2],[r4,2],[r1,6],[r2,6],[r3,6]].forEach(([r,c])=>{ws.getCell(r,c).numFmt='S/ #,##0.00';styleCell(ws.getCell(r,c),{bold:true,align:'right'});});
 
     const noteRow=r4+2;
-    ws.mergeCells(noteRow,1,noteRow,6);
-    ws.getCell(noteRow,1).value='Cada fila corresponde a un día del viaje. Hospedaje presupuestado: S/420 por día; alimentación: S/300 por día. Grupo usa el gasto real guardado cuando existe y, si no, la meta vigente de la app.';
-    styleCell(ws.getCell(noteRow,1),{fill:'FFF2CC',align:'left'}); ws.getRow(noteRow).height=42;
+    ws.mergeCells(noteRow,1,noteRow,8);
+    ws.getCell(noteRow,1).value='IGV = 18% del Presupuesto. Libre = Presupuesto - IGV. Persona = Grupo / 6. Ahorro = Libre - Grupo. Grupo usa el valor real guardado en la app cuando existe; si no, usa la meta vigente. Los gastos extra se descuentan en el resumen.';
+    styleCell(ws.getCell(noteRow,1),{fill:'FFF2CC',align:'left'}); ws.getRow(noteRow).height=52;
 
-    [13,10,32,14].forEach((w,i)=>ws.getColumn(i+1).width=w);
+    [13,12,34,14].forEach((w,i)=>ws.getColumn(i+1).width=w);
     for(let c=5;c<=28;c++)ws.getColumn(c).width=13;
+
+    const appWs=wb.addWorksheet('DATOS APP',{views:[{state:'frozen',ySplit:1}]});
+    appWs.columns=[
+      {header:'Fecha',key:'date',width:14},{header:'Destino',key:'place',width:38},{header:'Estado',key:'state',width:14},
+      {header:'Transporte real',key:'transport',width:16},{header:'Hospedaje real',key:'hotel',width:16},{header:'Alimentación real',key:'food',width:17},{header:'Movilidad real',key:'mobility',width:15},
+      {header:'Extras',key:'extras',width:14},{header:'Total registrado',key:'total',width:18},{header:'Última actualización',key:'updated',width:22}
+    ];
+    appWs.getRow(1).eachCell(c=>styleCell(c,{fill:'1F4E78',bold:true,fontColor:'FFFFFFFF',align:'center'}));
+    trip.forEach(day=>{
+      const actual=saved?.[day.date]?.actual||{};
+      const t=hasSaved(day)?Number(actual.transport)||0:0,h=hasSaved(day)?Number(actual.hotel)||0:0,f=hasSaved(day)?Number(actual.food)||0:0,m=hasSaved(day)?Number(actual.mobility)||0:0,e=extraTotalFor(day);
+      appWs.addRow({date:new Date(`${day.date}T00:00:00Z`),place:day.place,state:stateFor(day),transport:t,hotel:h,food:f,mobility:m,extras:e,total:t+h+f+m+e,updated:saved?.[day.date]?.updatedAt?new Date(saved[day.date].updatedAt):''});
+    });
+    for(let r=2;r<=appWs.rowCount;r++){
+      appWs.getCell(r,1).numFmt='dd/mm/yyyy';
+      for(let c=4;c<=9;c++)appWs.getCell(r,c).numFmt='S/ #,##0.00';
+      appWs.getCell(r,10).numFmt='dd/mm/yyyy hh:mm';
+      for(let c=1;c<=10;c++)styleCell(appWs.getCell(r,c),{align:c>=4&&c<=9?'right':'left'});
+    }
 
     const extraWs=wb.addWorksheet('GASTOS EXTRA');
     extraWs.columns=[{header:'Fecha',key:'date',width:14},{header:'Destino',key:'place',width:38},{header:'Descripción',key:'description',width:38},{header:'Monto',key:'amount',width:14}];
     extraWs.getRow(1).eachCell(c=>styleCell(c,{fill:'1F4E78',bold:true,fontColor:'FFFFFFFF',align:'center'}));
     let extraCount=0;
-    if(typeof extraSaved!=='undefined') trip.forEach(day=>{const list=Array.isArray(extraSaved[day.date])?extraSaved[day.date]:[];list.forEach(x=>{extraWs.addRow({date:new Date(`${day.date}T00:00:00Z`),place:day.place,description:x.description||'Gasto extra',amount:Number(x.amount)||0});extraCount++;});});
+    trip.forEach(day=>{extraListFor(day).forEach(x=>{extraWs.addRow({date:new Date(`${day.date}T00:00:00Z`),place:day.place,description:x.description||'Gasto extra',amount:Number(x.amount)||0});extraCount++;});});
     if(!extraCount)extraWs.addRow({description:'Sin gastos extra registrados',amount:0});
     for(let r=2;r<=extraWs.rowCount;r++){extraWs.getCell(r,1).numFmt='dd/mm/yyyy';extraWs.getCell(r,4).numFmt='S/ #,##0.00';for(let c=1;c<=4;c++)styleCell(extraWs.getCell(r,c),{align:c===4?'right':'left'});}
     return wb;
