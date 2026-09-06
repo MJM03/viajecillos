@@ -1,19 +1,6 @@
 const EXTRA_STORAGE_KEY='viajecillos-v2-extra-expenses';
 
-// La última hoja de Excel de Líder 2 tiene 11 filas de trabajo y no incluye
-// el traslado Huaraz → Chimbote como un día independiente. Lo quitamos del
-// conjunto mostrado sin alterar el formato ni la lógica de registro de la app.
-const obsoleteTransferIndex=trip.findIndex(d=>d.place==='Traslado Huaraz → Chimbote');
-if(obsoleteTransferIndex>=0){
-  trip.splice(obsoleteTransferIndex,1);
-  currentIndex=firstPendingIndex();
-  if(els.daySelect){
-    els.daySelect.innerHTML=trip.map((d,i)=>`<option value="${i}">${formatDate(d.date)} · ${d.place}${isClosed(d)?' ✓':hasProgress(d)?' •':''}</option>`).join('');
-    els.daySelect.value=String(currentIndex);
-  }
-}
-
-// El estimado base ahora sale directamente de los datos vigentes de la última hoja.
+// El estimado base sale directamente del calendario diario vigente.
 const BASELINE_PROJECTED_SPEND=sumTrip('target');
 let extraSaved=loadExtraExpenses();
 function loadExtraExpenses(){try{return JSON.parse(localStorage.getItem(EXTRA_STORAGE_KEY))||{}}catch{return {}}}
