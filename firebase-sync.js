@@ -74,7 +74,7 @@
             .catch(error => { console.warn('No se pudo crear el registro compartido:', error); showSyncMessage('Tus datos siguen guardados aquí. Falta activar Firebase para sincronizar.'); });
           return;
         }
-        applyRemote(snapshot.data());
+        applyRemote(snapshot.val());
         initialized = true;
         showSyncMessage('Sincronizado en tiempo real.');
       }, error => {
