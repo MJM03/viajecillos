@@ -1,8 +1,8 @@
 const PEOPLE = 6;
 const STORAGE_KEY = 'viajecillos-v4-expenses';
 
-// Presupuesto diario real del 05 al 19 de septiembre.
-// Alimentación: S/300 por día del 05 al 18. El 19 es un día extra solo para hospedaje y movilidad.
+// Presupuesto diario real del 05 al 18 de septiembre.
+// Alimentación: S/300 por día (14 días). Hospedaje: S/420 por día del 06 al 18 (13 días).
 // Transporte meta revisado por ruta para 6 personas; el presupuesto bruto asignado no cambia.
 const trip = [
   {date:'2026-09-05',place:'Salida Lima → Huaraz',gross:{transport:720,hotel:0,food:300,mobility:0},net:{transport:590.40,hotel:0,food:246,mobility:0},target:{transport:382.50,hotel:0,food:150,mobility:0}},
@@ -18,8 +18,7 @@ const trip = [
   {date:'2026-09-15',place:'Plaza de la Luna — T96',gross:{transport:0,hotel:420,food:300,mobility:108},net:{transport:0,hotel:344.40,food:246,mobility:88.56},target:{transport:0,hotel:120,food:150,mobility:44.28}},
   {date:'2026-09-16',place:'Sullana — K53',gross:{transport:240,hotel:420,food:300,mobility:108},net:{transport:196.80,hotel:344.40,food:246,mobility:88.56},target:{transport:60,hotel:160,food:150,mobility:44.28}},
   {date:'2026-09-17',place:'Costamar Plaza Tumbes — T40',gross:{transport:240,hotel:420,food:300,mobility:108},net:{transport:196.80,hotel:344.40,food:246,mobility:88.56},target:{transport:150,hotel:160,food:144,mobility:44.28}},
-  {date:'2026-09-18',place:'Retorno Tumbes → Lima',gross:{transport:1290,hotel:420,food:300,mobility:0},net:{transport:1057.80,hotel:344.40,food:246,mobility:0},target:{transport:600,hotel:150,food:144,mobility:0}},
-  {date:'2026-09-19',place:'Piura → Sullana → Piura → Tumbes',gross:{transport:0,hotel:420,food:0,mobility:960},net:{transport:0,hotel:344.40,food:0,mobility:787.20},target:{transport:0,hotel:420,food:0,mobility:960}}
+  {date:'2026-09-18',place:'Retorno Tumbes → Lima',gross:{transport:1290,hotel:420,food:300,mobility:0},net:{transport:1057.80,hotel:344.40,food:246,mobility:0},target:{transport:600,hotel:150,food:144,mobility:0}}
 ];
 const keys=['transport','hotel','food','mobility'];const money=n=>new Intl.NumberFormat('es-PE',{style:'currency',currency:'PEN',minimumFractionDigits:2}).format(Number.isFinite(n)?n:0);const sumObj=obj=>keys.reduce((s,k)=>s+(Number(obj[k])||0),0);const sumTrip=field=>trip.reduce((s,d)=>s+sumObj(d[field]),0);const formatDate=iso=>new Intl.DateTimeFormat('es-PE',{day:'2-digit',month:'short',timeZone:'UTC'}).format(new Date(`${iso}T00:00:00Z`));let saved=load();let currentIndex=firstPendingIndex();const $=id=>document.getElementById(id);const els={daySelect:$('daySelect'),dayMeta:$('dayMeta'),form:$('expenseForm'),saveMessage:$('saveMessage'),table:$('tripTableBody'),cards:$('tripCards'),saveProgress:$('saveProgressBtn'),closeDay:$('closeDayBtn'),reopenDay:$('reopenDayBtn'),inputs:{transport:$('transportInput'),hotel:$('hotelInput'),food:$('foodInput'),mobility:$('mobilityInput')},hints:{transport:$('transportHint'),hotel:$('hotelHint'),food:$('foodHint'),mobility:$('mobilityHint')}};
 function load(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch{return {}}}function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(saved))}function firstPendingIndex(){const i=trip.findIndex(d=>!saved[d.date]?.closed);return i>=0?i:trip.length-1}function actualFor(day){return saved[day.date]?.actual||{transport:0,hotel:0,food:0,mobility:0}}function hasProgress(day){return Boolean(saved[day.date]?.actual)}function isClosed(day){return Boolean(saved[day.date]?.closed)}function plannedSavings(day){return sumObj(day.net)-sumObj(day.target)}function actualSavings(day){return sumObj(day.net)-sumObj(actualFor(day))}function projectedSpendFor(day){if(isClosed(day))return sumObj(actualFor(day));if(hasProgress(day))return Math.max(sumObj(day.target),sumObj(actualFor(day)));return sumObj(day.target)}
