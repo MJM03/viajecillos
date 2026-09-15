@@ -16,7 +16,7 @@ const trip = [
   {date:'2026-09-13',place:'Real Plaza Piura — B25',gross:{transport:480,hotel:420,food:300,mobility:108},net:{transport:393.60,hotel:344.40,food:246,mobility:88.56},target:{transport:150,hotel:150,food:150,mobility:44.28}},
   {date:'2026-09-14',place:'Plaza del Sol Piura — K21',gross:{transport:0,hotel:420,food:300,mobility:108},net:{transport:0,hotel:344.40,food:246,mobility:88.56},target:{transport:0,hotel:150,food:150,mobility:44.28}},
   {date:'2026-09-15',place:'Plaza de la Luna — T96',gross:{transport:0,hotel:420,food:300,mobility:108},net:{transport:0,hotel:344.40,food:246,mobility:88.56},target:{transport:0,hotel:120,food:150,mobility:44.28}},
-  {date:'2026-09-16',place:'Sullana — K53',gross:{transport:480,hotel:420,food:300,mobility:108},net:{transport:393.60,hotel:344.40,food:246,mobility:88.56},target:{transport:60,hotel:160,food:150,mobility:44.28}},
+  {date:'2026-09-16',place:'Sullana — K53',gross:{transport:240,hotel:420,food:300,mobility:108},net:{transport:196.80,hotel:344.40,food:246,mobility:88.56},target:{transport:60,hotel:160,food:150,mobility:44.28}},
   {date:'2026-09-17',place:'Costamar Plaza Tumbes — T40',gross:{transport:480,hotel:420,food:300,mobility:108},net:{transport:393.60,hotel:344.40,food:246,mobility:88.56},target:{transport:150,hotel:160,food:144,mobility:44.28}},
   {date:'2026-09-18',place:'Retorno Tumbes → Lima',gross:{transport:1290,hotel:420,food:300,mobility:0},net:{transport:1057.80,hotel:344.40,food:246,mobility:0},target:{transport:600,hotel:150,food:144,mobility:0}}
 ];
